@@ -9,6 +9,7 @@ interface SavedQuotationsListProps {
 
 export const SavedQuotationsList = ({ onLoad, onClose }: SavedQuotationsListProps) => {
   const [quotations, setQuotations] = useState<SavedQuotation[]>(getSavedQuotations());
+  const [searchTerm, setSearchTerm] = useState('');
 
   const handleDelete = (quotationNumber: string) => {
     if (confirm('Are you sure you want to delete this quotation?')) {
@@ -22,6 +23,11 @@ export const SavedQuotationsList = ({ onLoad, onClose }: SavedQuotationsListProp
     onClose();
   };
 
+  // Filter quotations by client name
+  const filteredQuotations = quotations.filter(q =>
+    q.client.name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal-content" onClick={(e) => e.stopPropagation()}>
@@ -30,11 +36,23 @@ export const SavedQuotationsList = ({ onLoad, onClose }: SavedQuotationsListProp
           <button className="close-btn" onClick={onClose}>✕</button>
         </div>
         
+        <div className="search-section">
+          <input
+            type="text"
+            placeholder="🔍 Search by client name..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="search-input"
+          />
+        </div>
+        
         <div className="quotations-list">
-          {quotations.length === 0 ? (
-            <p className="empty-message">No saved quotations yet</p>
+          {filteredQuotations.length === 0 ? (
+            <p className="empty-message">
+              {searchTerm ? 'No quotations found matching your search' : 'No saved quotations yet'}
+            </p>
           ) : (
-            quotations.map((quotation) => (
+            filteredQuotations.map((quotation) => (
               <div key={quotation.id} className="quotation-item">
                 <div className="quotation-info">
                   <h3>{quotation.quotationNumber}</h3>

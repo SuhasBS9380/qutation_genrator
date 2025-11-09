@@ -114,21 +114,25 @@
 .subtotal-row {
   background-color: #f8f9fa;
   font-weight: 600;
+  color: #2C3E50 !important;
 }
 
 .subtotal-row td {
   padding: 0.8rem;
   border: none;
   border-top: 2px solid #2C3E50;
+  color: #2C3E50 !important;
 }
 
 .gst-row {
   background-color: #f8f9fa;
+  color: #2C3E50 !important;
 }
 
 .gst-row td {
   padding: 0.8rem;
   border: none;
+  color: #2C3E50 !important;
 }
 
 .gst-label {

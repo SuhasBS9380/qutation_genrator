@@ -30,6 +30,31 @@
   border-bottom: 2px solid #EEEEEE;
 }
 
+.search-section {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #EEEEEE;
+  background: #F8F9FA;
+}
+
+.search-input {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  border: 2px solid #DDDDDD;
+  border-radius: 6px;
+  font-size: 15px;
+  transition: all 0.2s;
+}
+
+.search-input:focus {
+  outline: none;
+  border-color: #F5A962;
+  box-shadow: 0 0 0 3px rgba(245, 169, 98, 0.1);
+}
+
+.search-input::placeholder {
+  color: #999999;
+}
+
 .modal-header h2 {
   margin: 0;
   color: #2C3E50;
