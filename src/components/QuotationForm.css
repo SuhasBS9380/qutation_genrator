@@ -1,0 +1,125 @@
+.quotation-form {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem 0;
+  background-color: #FFFFFF;
+  min-height: 100vh;
+}
+
+.info-sections {
+  display: flex;
+  gap: 2rem;
+  margin: 2rem 0;
+  padding: 0 1.5rem;
+  border-bottom: 2px solid #DDDDDD;
+  padding-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+  .info-sections {
+    flex-direction: column;
+    gap: 1rem;
+  }
+  
+  .company-section {
+    text-align: left;
+  }
+  
+  .detail-row {
+    justify-content: flex-start;
+  }
+}
+
+@media print {
+  .quotation-form {
+    padding: 0;
+  }
+  
+  @page {
+    size: A4;
+    margin: 15mm;
+  }
+}
+
+
+.load-saved-btn {
+  position: fixed;
+  top: 20px;
+  left: 20px;
+  z-index: 1000;
+  background: linear-gradient(135deg, #2C3E50 0%, #34495e 100%);
+  color: white;
+  border: none;
+  padding: 0.9rem 1.5rem;
+  font-size: 15px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(44, 62, 80, 0.3);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.load-saved-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(44, 62, 80, 0.4);
+}
+
+.save-section {
+  margin: 2rem 1.5rem;
+  padding: 2rem;
+  background: #F8F9FA;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.save-btn {
+  background: linear-gradient(135deg, #27AE60 0%, #229954 100%);
+  color: white;
+  border: none;
+  padding: 1rem 2.5rem;
+  font-size: 16px;
+  font-weight: 600;
+  border-radius: 8px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(39, 174, 96, 0.3);
+  transition: all 0.3s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(39, 174, 96, 0.4);
+}
+
+.save-message {
+  color: #27AE60;
+  font-weight: 600;
+  font-size: 14px;
+  animation: fadeIn 0.3s ease-in;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media print {
+  .load-saved-btn,
+  .save-section {
+    display: none;
+  }
+}

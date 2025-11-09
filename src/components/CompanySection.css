@@ -1,0 +1,23 @@
+.company-section {
+  flex: 1;
+  padding: 1.5rem;
+  text-align: right;
+}
+
+.detail-row {
+  margin-bottom: 1rem;
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.5rem;
+}
+
+.detail-label {
+  font-weight: 700;
+  color: #2C3E50;
+  font-size: 14px;
+}
+
+.detail-value {
+  color: #666666;
+  font-size: 14px;
+}
