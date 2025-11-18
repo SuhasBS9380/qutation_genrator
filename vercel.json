@@ -9,21 +9,11 @@
       }
     }
   ],
-  "routes": [
-    {
-      "src": "/api/quotations",
-      "dest": "/api/quotations.js"
-    },
-    {
-      "src": "/api/quotations/(.*)",
-      "dest": "/api/quotations.js"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
-    }
-  ],
   "rewrites": [
+    {
+      "source": "/api/quotations/:path*",
+      "destination": "/api/quotations.js"
+    },
     {
       "source": "/api/quotations",
       "destination": "/api/quotations.js"
