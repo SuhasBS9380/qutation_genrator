@@ -1,56 +1,67 @@
 import type { QuotationData } from '../types/quotation';
 
-const STORAGE_KEY = 'vm_construction_quotations';
+// Use environment variable or default to localhost for development
+const API_URL = (import.meta as any).env?.PROD 
+  ? '/api'  // Production (Vercel) - relative path
+  : 'http://localhost:3001/api';  // Development - local server
 
 export interface SavedQuotation extends QuotationData {
   savedAt: string;
   id: string;
 }
 
-export const saveQuotation = (quotation: QuotationData): void => {
-  const saved = getSavedQuotations();
-  
-  // Check if quotation with same client name and email exists
-  const existingIndex = saved.findIndex(q => 
-    q.client.name.toLowerCase().trim() === quotation.client.name.toLowerCase().trim() &&
-    q.client.email.toLowerCase().trim() === quotation.client.email.toLowerCase().trim()
-  );
-  
+export const saveQuotation = async (quotation: QuotationData): Promise<void> => {
   const savedQuotation: SavedQuotation = {
     ...quotation,
     id: quotation.quotationNumber,
     savedAt: new Date().toISOString()
   };
   
-  if (existingIndex >= 0) {
-    // Update existing quotation
-    saved[existingIndex] = savedQuotation;
-  } else {
-    // Add new quotation
-    saved.push(savedQuotation);
+  try {
+    const response = await fetch(`${API_URL}/quotations`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(savedQuotation)
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to save quotation');
+    }
+  } catch (error) {
+    console.error('Save error:', error);
+    throw error;
   }
-  
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(saved));
 };
 
-export const getSavedQuotations = (): SavedQuotation[] => {
-  const data = localStorage.getItem(STORAGE_KEY);
-  if (!data) return [];
-  
+export const getSavedQuotations = async (): Promise<SavedQuotation[]> => {
   try {
-    return JSON.parse(data);
-  } catch {
+    const response = await fetch(`${API_URL}/quotations`);
+    if (!response.ok) {
+      throw new Error('Failed to load quotations');
+    }
+    return await response.json();
+  } catch (error) {
+    console.error('Load error:', error);
     return [];
   }
 };
 
-export const loadQuotation = (quotationNumber: string): SavedQuotation | null => {
-  const saved = getSavedQuotations();
+export const loadQuotation = async (quotationNumber: string): Promise<SavedQuotation | null> => {
+  const saved = await getSavedQuotations();
   return saved.find(q => q.quotationNumber === quotationNumber) || null;
 };
 
-export const deleteQuotation = (quotationNumber: string): void => {
-  const saved = getSavedQuotations();
-  const filtered = saved.filter(q => q.quotationNumber !== quotationNumber);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(filtered));
+export const deleteQuotation = async (quotationNumber: string): Promise<void> => {
+  try {
+    const response = await fetch(`${API_URL}/quotations/${quotationNumber}`, {
+      method: 'DELETE'
+    });
+    
+    if (!response.ok) {
+      throw new Error('Failed to delete quotation');
+    }
+  } catch (error) {
+    console.error('Delete error:', error);
+    throw error;
+  }
 };

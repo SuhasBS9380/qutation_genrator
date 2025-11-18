@@ -12,7 +12,6 @@ export async function generateQuotationPDF(data: QuotationData): Promise<void> {
   // Colors
   const peachyOrange = '#F5A962';
   const darkNavy = '#2C3E50';
-  const lightGray = '#F5F5F5';
   
   // Helper to convert hex to RGB
   const hexToRgb = (hex: string) => {
@@ -26,7 +25,6 @@ export async function generateQuotationPDF(data: QuotationData): Promise<void> {
   
   const peachRgb = hexToRgb(peachyOrange);
   const navyRgb = hexToRgb(darkNavy);
-  const grayRgb = hexToRgb(lightGray);
   
   // Header - Two-tone design with diagonal split
   // Main peachy orange section (full background)
@@ -231,24 +229,64 @@ export async function generateQuotationPDF(data: QuotationData): Promise<void> {
   
   const finalY = summaryY + 20;
   
-  // Terms and Conditions
-  doc.setFillColor(grayRgb.r, grayRgb.g, grayRgb.b);
+  // Terms and Conditions - with professional gradient-like background
+  // Light peach background with border
+  const lightPeachRgb = { r: 255, g: 249, b: 240 };
+  doc.setFillColor(lightPeachRgb.r, lightPeachRgb.g, lightPeachRgb.b);
   doc.rect(15, finalY, 180, 50, 'F');
   
+  // Add border
+  doc.setDrawColor(peachRgb.r, peachRgb.g, peachRgb.b);
+  doc.setLineWidth(0.5);
+  doc.rect(15, finalY, 180, 50, 'S');
+  
+  // Header with underline
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.setTextColor(navyRgb.r, navyRgb.g, navyRgb.b);
   doc.text('TERMS AND CONDITIONS', 20, finalY + 8);
   
+  // Underline for header
+  doc.setDrawColor(peachRgb.r, peachRgb.g, peachRgb.b);
+  doc.setLineWidth(0.8);
+  doc.line(20, finalY + 10, 190, finalY + 10);
+  
+  // Terms content
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(50, 50, 50);
   
-  let yPos = finalY + 15;
-  data.termsAndConditions.forEach(term => {
-    doc.text(`• ${term}`, 20, yPos, { maxWidth: 170 });
-    yPos += 8;
-  });
+  let yPos = finalY + 17;
+  
+  // Filter out empty terms
+  const validTerms = data.termsAndConditions.filter(term => term.trim() !== '');
+  
+  if (validTerms.length > 0) {
+    validTerms.forEach((term, index) => {
+      // Add bullet point
+      doc.setFont('helvetica', 'bold');
+      doc.text('•', 20, yPos);
+      
+      // Add term text
+      doc.setFont('helvetica', 'normal');
+      const lines = doc.splitTextToSize(term, 165);
+      doc.text(lines, 25, yPos);
+      
+      // Calculate height for this term
+      const lineHeight = 4.5;
+      yPos += lines.length * lineHeight;
+      
+      // Add spacing between terms
+      if (index < validTerms.length - 1) {
+        yPos += 2;
+      }
+    });
+  } else {
+    // If no terms, show a message
+    doc.setFont('helvetica', 'italic');
+    doc.setTextColor(100, 100, 100);
+    doc.text('No terms and conditions specified.', 20, yPos);
+  }
   
   // Save PDF
   doc.save(`VM_Construction_Quotation_${data.quotationNumber}.pdf`);

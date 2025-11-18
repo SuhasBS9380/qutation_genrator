@@ -47,7 +47,7 @@ export const QuotationForm = () => {
   const [quotationNumber] = useState(generateQuotationNumber());
   const [date] = useState(new Date().toLocaleDateString('en-IN'));
   const [gstPercentage, setGstPercentage] = useState<number>(18);
-  const [termsAndConditions] = useState<string[]>([
+  const [termsAndConditions, setTermsAndConditions] = useState<string[]>([
     'Validity: Estimate valid for 30 days.',
     'Payment: Late payments may result in extra charges.',
     'Changes: Scope changes may incur additional charges, documented via change orders.',
@@ -102,6 +102,9 @@ export const QuotationForm = () => {
     setClientInfo(saved.client);
     setServices(saved.services);
     setGstPercentage(saved.gstPercentage);
+    if (saved.termsAndConditions && saved.termsAndConditions.length > 0) {
+      setTermsAndConditions(saved.termsAndConditions);
+    }
   };
 
   const quotationData: QuotationData = {
@@ -137,7 +140,7 @@ export const QuotationForm = () => {
         onGstChange={setGstPercentage}
       />
       
-      <TermsSection />
+      <TermsSection terms={termsAndConditions} onChange={setTermsAndConditions} />
       
       <div className="save-section">
         <button className="save-btn" onClick={handleSave}>

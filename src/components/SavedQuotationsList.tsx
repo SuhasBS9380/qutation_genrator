@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { getSavedQuotations, deleteQuotation, type SavedQuotation } from '../utils/storage';
 import './SavedQuotationsList.css';
 
@@ -8,13 +8,36 @@ interface SavedQuotationsListProps {
 }
 
 export const SavedQuotationsList = ({ onLoad, onClose }: SavedQuotationsListProps) => {
-  const [quotations, setQuotations] = useState<SavedQuotation[]>(getSavedQuotations());
+  const [quotations, setQuotations] = useState<SavedQuotation[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const handleDelete = (quotationNumber: string) => {
+  // Load quotations when component mounts
+  useEffect(() => {
+    loadQuotations();
+  }, []);
+
+  const loadQuotations = async () => {
+    setLoading(true);
+    try {
+      const saved = await getSavedQuotations();
+      setQuotations(saved);
+    } catch (error) {
+      console.error('Failed to load quotations:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async (quotationNumber: string) => {
     if (confirm('Are you sure you want to delete this quotation?')) {
-      deleteQuotation(quotationNumber);
-      setQuotations(getSavedQuotations());
+      try {
+        await deleteQuotation(quotationNumber);
+        await loadQuotations(); // Reload the list
+      } catch (error) {
+        console.error('Failed to delete quotation:', error);
+        alert('Failed to delete quotation');
+      }
     }
   };
 
@@ -47,7 +70,9 @@ export const SavedQuotationsList = ({ onLoad, onClose }: SavedQuotationsListProp
         </div>
         
         <div className="quotations-list">
-          {filteredQuotations.length === 0 ? (
+          {loading ? (
+            <p className="empty-message">Loading quotations...</p>
+          ) : filteredQuotations.length === 0 ? (
             <p className="empty-message">
               {searchTerm ? 'No quotations found matching your search' : 'No saved quotations yet'}
             </p>
