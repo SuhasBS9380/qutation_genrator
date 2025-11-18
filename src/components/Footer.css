@@ -1,0 +1,79 @@
+.quotation-footer {
+  margin: 2rem 1.5rem 1rem;
+  padding: 0;
+  border-top: 3px solid #F5A962;
+}
+
+.footer-content {
+  background: linear-gradient(135deg, #2C3E50 0%, #34495e 100%);
+  padding: 1.5rem 2rem;
+  border-radius: 0 0 8px 8px;
+  box-shadow: 0 4px 12px rgba(44, 62, 80, 0.15);
+}
+
+.bank-details {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid rgba(245, 169, 98, 0.3);
+  flex-wrap: wrap;
+}
+
+.bank-label {
+  font-size: 14px;
+  font-weight: 700;
+  color: #F5A962;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.bank-info {
+  font-size: 13px;
+  color: #FFFFFF;
+  line-height: 1.6;
+  flex: 1;
+}
+
+.bank-info strong {
+  color: #F5A962;
+  font-weight: 700;
+}
+
+.footer-message {
+  font-size: 12px;
+  color: #E8E8E8;
+  text-align: center;
+  line-height: 1.6;
+  font-style: italic;
+  padding: 0.5rem 0;
+}
+
+@media (max-width: 768px) {
+  .bank-details {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.5rem;
+  }
+  
+  .bank-info {
+    font-size: 12px;
+  }
+  
+  .footer-message {
+    font-size: 11px;
+  }
+}
+
+@media print {
+  .quotation-footer {
+    margin: 1rem 0 0;
+    page-break-inside: avoid;
+  }
+  
+  .footer-content {
+    box-shadow: none;
+  }
+}

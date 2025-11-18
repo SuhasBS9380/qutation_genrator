@@ -10,3 +10,10 @@ export const COMPANY_DATA: CompanyDetails = {
   email: 'vmconstructions2025@gmail.com',
   tagline: 'Professional construction services across Karnataka since 2023. Specializing in residential, commercial, infrastructure projects, and interior design solutions.'
 };
+
+export const BANK_DETAILS = {
+  accountName: 'V M Construction',
+  bankName: 'Union Bank of India',
+  accountNumber: '315121010000076',
+  ifscCode: 'UBIN0931519'
+};

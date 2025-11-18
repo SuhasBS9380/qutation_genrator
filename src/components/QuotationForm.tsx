@@ -5,6 +5,7 @@ import { ClientSection } from './ClientSection';
 import { CompanySection } from './CompanySection';
 import { ServicesTable } from './ServicesTable';
 import { TermsSection } from './TermsSection';
+import { Footer } from './Footer';
 import { DownloadButton } from './DownloadButton';
 import { SavedQuotationsList } from './SavedQuotationsList';
 import { saveQuotation, type SavedQuotation } from '../utils/storage';
@@ -141,6 +142,8 @@ export const QuotationForm = () => {
       />
       
       <TermsSection terms={termsAndConditions} onChange={setTermsAndConditions} />
+      
+      <Footer />
       
       <div className="save-section">
         <button className="save-btn" onClick={handleSave}>

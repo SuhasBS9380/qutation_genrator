@@ -1,7 +1,7 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import type { QuotationData } from '../types/quotation';
-import { COMPANY_DATA } from '../constants/companyData';
+import { COMPANY_DATA, BANK_DETAILS } from '../constants/companyData';
 import { loadLogoAsBase64 } from './logoLoader';
 
 export async function generateQuotationPDF(data: QuotationData): Promise<void> {
@@ -189,104 +189,172 @@ export async function generateQuotationPDF(data: QuotationData): Promise<void> {
   });
   
   // Get Y position after table
-  let summaryY = (doc as any).lastAutoTable.finalY + 8;
+  let currentY = (doc as any).lastAutoTable.finalY + 8;
   
   // Summary section positioning - aligned with TOTAL PRICE column
-  // Total Price column starts at: 10 + 15 + 28 + 42 + 15 + 18 + 24 = 152mm
   const totalPriceColStart = 152;
   const totalPriceColWidth = 28;
   const totalPriceColEnd = totalPriceColStart + totalPriceColWidth;
+  
+  // Check if we need a new page for summary (need at least 35mm space)
+  if (currentY > 262) {
+    doc.addPage();
+    currentY = 20;
+  }
   
   // Subtotal row
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(10);
   doc.setTextColor(60, 60, 60);
-  doc.text('Subtotal:', totalPriceColStart - 35, summaryY);
-  doc.text(Math.round(subtotal).toLocaleString('en-IN'), totalPriceColEnd, summaryY, { align: 'right' });
+  doc.text('Subtotal:', totalPriceColStart - 35, currentY);
+  doc.text(Math.round(subtotal).toLocaleString('en-IN'), totalPriceColEnd, currentY, { align: 'right' });
   
-  summaryY += 10;
+  currentY += 10;
   
   // GST row
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(10);
-  doc.text(`GST (${data.gstPercentage}%):`, totalPriceColStart - 35, summaryY);
-  doc.text(Math.round(gstAmount).toLocaleString('en-IN'), totalPriceColEnd, summaryY, { align: 'right' });
+  doc.text(`GST (${data.gstPercentage}%):`, totalPriceColStart - 35, currentY);
+  doc.text(Math.round(gstAmount).toLocaleString('en-IN'), totalPriceColEnd, currentY, { align: 'right' });
   
-  summaryY += 12;
+  currentY += 12;
   
   // Grand Total row - full width dark navy background
   const totalX = 10;
   const totalWidth = 190;
   
   doc.setFillColor(44, 62, 80);
-  doc.rect(totalX, summaryY, totalWidth, 11, 'F');
+  doc.rect(totalX, currentY, totalWidth, 11, 'F');
   
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.setTextColor(255, 255, 255);
-  doc.text('GRAND TOTAL (INC. GST)', totalX + 10, summaryY + 7.5);
-  doc.text(`Rs ${Math.round(grandTotal).toLocaleString('en-IN')}`, totalX + totalWidth - 10, summaryY + 7.5, { align: 'right' });
+  doc.text('GRAND TOTAL (INC. GST)', totalX + 10, currentY + 7.5);
+  doc.text(`Rs ${Math.round(grandTotal).toLocaleString('en-IN')}`, totalX + totalWidth - 10, currentY + 7.5, { align: 'right' });
   
-  const finalY = summaryY + 20;
+  currentY += 20;
+  
+  // Filter out empty terms
+  const validTerms = data.termsAndConditions.filter(term => term.trim() !== '');
+  
+  // Calculate approximate height needed for terms
+  const lineHeight = 4.5;
+  let termsHeight = 25; // Header + padding
+  validTerms.forEach(term => {
+    const lines = doc.splitTextToSize(term, 165);
+    termsHeight += lines.length * lineHeight + 2;
+  });
+  
+  // Check if we need a new page for terms (need space for terms + footer = ~80mm minimum)
+  const footerHeight = 25;
+  const requiredSpace = termsHeight + footerHeight + 10;
+  
+  if (currentY + requiredSpace > 297) {
+    doc.addPage();
+    currentY = 20;
+  }
   
   // Terms and Conditions - with professional gradient-like background
-  // Light peach background with border
+  const termsStartY = currentY;
   const lightPeachRgb = { r: 255, g: 249, b: 240 };
+  
+  // We'll draw the background box after calculating actual height
+  let termsContentY = termsStartY + 17;
+  
+  // Calculate actual terms content
+  const termLines: Array<{ bullet: string; text: string[]; y: number }> = [];
+  
+  if (validTerms.length > 0) {
+    validTerms.forEach((term) => {
+      const lines = doc.splitTextToSize(term, 165);
+      termLines.push({ bullet: '•', text: lines, y: termsContentY });
+      termsContentY += lines.length * lineHeight + 2;
+    });
+  }
+  
+  // Now draw the background box with actual height
+  const actualTermsHeight = termsContentY - termsStartY + 5;
   doc.setFillColor(lightPeachRgb.r, lightPeachRgb.g, lightPeachRgb.b);
-  doc.rect(15, finalY, 180, 50, 'F');
+  doc.rect(15, termsStartY, 180, actualTermsHeight, 'F');
   
   // Add border
   doc.setDrawColor(peachRgb.r, peachRgb.g, peachRgb.b);
   doc.setLineWidth(0.5);
-  doc.rect(15, finalY, 180, 50, 'S');
+  doc.rect(15, termsStartY, 180, actualTermsHeight, 'S');
   
   // Header with underline
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(12);
   doc.setTextColor(navyRgb.r, navyRgb.g, navyRgb.b);
-  doc.text('TERMS AND CONDITIONS', 20, finalY + 8);
+  doc.text('TERMS AND CONDITIONS', 20, termsStartY + 8);
   
   // Underline for header
   doc.setDrawColor(peachRgb.r, peachRgb.g, peachRgb.b);
   doc.setLineWidth(0.8);
-  doc.line(20, finalY + 10, 190, finalY + 10);
+  doc.line(20, termsStartY + 10, 190, termsStartY + 10);
   
-  // Terms content
+  // Draw terms content
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
   doc.setTextColor(50, 50, 50);
   
-  let yPos = finalY + 17;
-  
-  // Filter out empty terms
-  const validTerms = data.termsAndConditions.filter(term => term.trim() !== '');
-  
-  if (validTerms.length > 0) {
-    validTerms.forEach((term, index) => {
-      // Add bullet point
+  if (termLines.length > 0) {
+    termLines.forEach(({ bullet, text, y }) => {
       doc.setFont('helvetica', 'bold');
-      doc.text('•', 20, yPos);
-      
-      // Add term text
+      doc.text(bullet, 20, y);
       doc.setFont('helvetica', 'normal');
-      const lines = doc.splitTextToSize(term, 165);
-      doc.text(lines, 25, yPos);
-      
-      // Calculate height for this term
-      const lineHeight = 4.5;
-      yPos += lines.length * lineHeight;
-      
-      // Add spacing between terms
-      if (index < validTerms.length - 1) {
-        yPos += 2;
-      }
+      doc.text(text, 25, y);
     });
   } else {
-    // If no terms, show a message
     doc.setFont('helvetica', 'italic');
     doc.setTextColor(100, 100, 100);
-    doc.text('No terms and conditions specified.', 20, yPos);
+    doc.text('No terms and conditions specified.', 20, termsStartY + 17);
   }
+  
+  currentY = termsStartY + actualTermsHeight + 10;
+  
+  // Check if footer fits on current page (need 25mm)
+  if (currentY + footerHeight > 297) {
+    doc.addPage();
+    currentY = 20;
+  }
+  
+  // Footer - Bank Details and Message
+  const footerY = currentY;
+  
+  // Top border line
+  doc.setDrawColor(peachRgb.r, peachRgb.g, peachRgb.b);
+  doc.setLineWidth(1);
+  doc.line(10, footerY, 200, footerY);
+  
+  // Dark navy background for footer
+  doc.setFillColor(navyRgb.r, navyRgb.g, navyRgb.b);
+  doc.rect(10, footerY + 1, 190, 20, 'F');
+  
+  // Bank Details Section
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(9);
+  doc.setTextColor(peachRgb.r, peachRgb.g, peachRgb.b);
+  doc.text('BANK A/C DETAILS:', 12, footerY + 6);
+  
+  // Bank info in single line
+  doc.setFont('helvetica', 'normal');
+  doc.setFontSize(8.5);
+  doc.setTextColor(255, 255, 255);
+  const bankInfo = `${BANK_DETAILS.accountName} | Bank: ${BANK_DETAILS.bankName} | A/c No: ${BANK_DETAILS.accountNumber} | IFSC: ${BANK_DETAILS.ifscCode}`;
+  doc.text(bankInfo, 12, footerY + 11);
+  
+  // Separator line
+  doc.setDrawColor(peachRgb.r, peachRgb.g, peachRgb.b);
+  doc.setLineWidth(0.3);
+  doc.line(12, footerY + 13, 198, footerY + 13);
+  
+  // Footer message
+  doc.setFont('helvetica', 'italic');
+  doc.setFontSize(8);
+  doc.setTextColor(232, 232, 232);
+  const footerMessage = 'We hope that you will find our offer favorable and place your valued order on us. We assure you of our best services at all time.';
+  doc.text(footerMessage, 105, footerY + 17.5, { align: 'center', maxWidth: 180 });
   
   // Save PDF
   doc.save(`VM_Construction_Quotation_${data.quotationNumber}.pdf`);
